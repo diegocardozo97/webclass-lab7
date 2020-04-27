@@ -1,0 +1,33 @@
+{
+  "name": "bookmarks-app",
+  "version": "0.1.0",
+  "description": "Server for the laboratory practice #7 of WebClass. A basic server.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diegocardozo97/webclass-lab7.git"
+  },
+  "keywords": [
+    "nodejs",
+    "server",
+    "webclass",
+    "practice",
+    "javascript"
+  ],
+  "author": "Diego Cardozo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/diegocardozo97/webclass-lab7/issues"
+  },
+  "homepage": "https://github.com/diegocardozo97/webclass-lab7#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "uuid": "^7.0.3"
+  }
+}
