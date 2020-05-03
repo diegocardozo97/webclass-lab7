@@ -1,5 +1,4 @@
 const express = require('express');
-const {v4: uuidv4} = require('uuid');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
@@ -11,27 +10,23 @@ const jsonBodyParser = bodyParser.json();
 
 app.use(morgan('dev'));
 
-const bookmarks = [
+const bookmarksToAddInStart = [
   {
-    id: uuidv4(),
     title: "google",
     description: "A recomended very good one.",
     url: "google.com",
     rating: 5,
   }, {
-    id: uuidv4(),
     title: "youtube",
     description: "A recomended good one.",
     url: "youtube.com",
     rating: 4,
   }, {
-    id: uuidv4(),
     title: "facebook",
     description: "A recomended one.",
     url: "fb.com",
     rating: 3,
   }, {
-    id: uuidv4(),
     title: "twitter",
     description: "An okay one.",
     url: "twitter.com",
@@ -62,7 +57,13 @@ app.use(validateAuthorization);
 app.get('/bookmarks', (req, res) => {
   console.log("Getting all bookmarks.");
 
-  return res.status(200).json(bookmarks);
+  Bookmarks
+    .getAll()
+    .then(result => res.status(200).json(result))
+    .catch(err => {
+      res.statusMessage = "Something is wrong with the Database. Try again later.";
+      return res.status(500).end();
+    });
 });
 
 app.get('/bookmark', (req, res) => {
@@ -77,13 +78,19 @@ app.get('/bookmark', (req, res) => {
       return res.status(406).end();
     }
 
-    const result = bookmarks.filter(bookmark => bookmark.title === title);
-    if(result.length === 0){
-        res.statusMessage = `There are no bookmarks with the provided 'title=${title}'.`;
-        return res.status(404).end();
-    }
-
-    return res.status(200).json(result); 
+    Bookmarks
+      .getBookmarksByTitle(title)
+      .then(result => {
+        if (result.length === 0) {
+          res.statusMessage = `There are no bookmarks with the provided 'title=${title}'.`;
+          return res.status(404).end();
+        }
+        res.status(200).json(result)
+      })
+      .catch(err => {
+        res.statusMessage = "Something is wrong with the Database. Try again later.";
+        return res.status(500).end();
+      });
 });
 
 app.post('/bookmarks', jsonBodyParser, (req, res) => {
@@ -100,16 +107,15 @@ app.post('/bookmarks', jsonBodyParser, (req, res) => {
       return res.status(409).end();
   }
 
-  const newBookmark = {
-    id: uuidv4(),
-    title,
-    description,
-    url,
-    rating,
-  };
-  bookmarks.push(newBookmark);
-
-  return res.status(201).json(newBookmark); 
+  Bookmarks
+    .createBookmark({title, description, url, rating})
+    .then(result => {
+      res.status(201).json(result)
+    })
+    .catch(err => {
+      res.statusMessage = "Something is wrong with the Database. Try again later.";
+      return res.status(500).end();
+    });
 });
 
 app.delete('/bookmark/:id', (req, res) => {
@@ -118,16 +124,21 @@ app.delete('/bookmark/:id', (req, res) => {
 
   const id = req.params.id;
 
-  const itemToRemove = bookmarks.findIndex(bookmark => id === bookmark.id);
-  if(itemToRemove < 0){
-      res.statusMessage = "That 'id' was not found in the list of bookmarks.";
-      return res.status(404).end();
-  }
+  Bookmarks
+    .deleteBookmark(id)
+    .then(result => {
+      if (result.deletedCount === 0) {
+        res.statusMessage = "That 'id' was not found in the list of bookmarks.";
+        return res.status(404).end();
+      }
 
-  bookmarks.splice(itemToRemove, 1);
-
-  return res.status(200).end(); 
-  // return res.status( 204 ).end();
+      return res.status(200).end(); 
+      // return res.status( 204 ).end();
+    })
+    .catch(err => {
+      res.statusMessage = "Something is wrong with the Database. Try again later." + err;
+      return res.status(500).end();
+    });
 });
 
 app.patch('/bookmark/:id', jsonBodyParser, (req, res) => {
@@ -143,42 +154,56 @@ app.patch('/bookmark/:id', jsonBodyParser, (req, res) => {
     return res.status(409).end();
   }
 
-  const objToUpdate = bookmarks.find(bookmark => req.body.id === bookmark.id);
-  if(objToUpdate === undefined){
-      res.statusMessage = "That 'id' was not found in the list of bookmarks.";
-      return res.status(404).end();
-  }
-
+  const objectNewValues = {};
   if ("title" in req.body) {
     if (typeof(req.body.title) !== "string") {
       res.statusMessage = "That 'title' is not a string.";
       return res.status(409).end();
     }
-    objToUpdate.title = req.body.title;
+    objectNewValues.title = req.body.title;
   }
   if ("description" in req.body) {
     if (typeof(req.body.description) !== "string") {
       res.statusMessage = "That 'description' is not a string.";
       return res.status(409).end();
     }
-    objToUpdate.description = req.body.description;
+    objectNewValues.description = req.body.description;
   }
   if ("url" in req.body) {
     if (typeof(req.body.url) !== "string") {
       res.statusMessage = "That 'url' is not a string.";
       return res.status(409).end();
     }
-    objToUpdate.url = req.body.url;
+    objectNewValues.url = req.body.url;
   }
   if ("rating" in req.body) {
     if (typeof(req.body.rating) !== "number") {
       res.statusMessage = "That 'rating' is not a number.";
       return res.status(409).end();
     }
-    objToUpdate.rating = req.body.rating;
+    objectNewValues.rating = req.body.rating;
   }
 
-  return res.status(202).json(objToUpdate);
+  Bookmarks
+    .updateBookmark(req.body.id, objectNewValues)
+    .then(result => {
+      if (result.nModified === 0) {
+        res.statusMessage = "That 'id' was not found in the list of bookmarks.";
+        return res.status(404).end();
+      }
+
+      Bookmarks
+        .getBookmarkById(req.body.id)
+        .then(result => res.status(202).json(result))
+        .catch(err => {
+          res.statusMessage = "Something is wrong with the Database. Try again later.";
+          return res.status(500).end();
+        });
+    })
+    .catch(err => {
+      res.statusMessage = "Something is wrong with the Database. Try again later.";
+      return res.status(500).end();
+    });
 });
 
 app.listen(8080, () => {
@@ -197,11 +222,17 @@ app.listen(8080, () => {
         if (err) {
           return reject(err);
         } else {
-          console.log("Database connected successfully.");
+          console.log("Database connected successfully, adding initial data...");
           return resolve();
         }
       },
     );
+  })
+  .then(() => {
+    Bookmarks
+      .insertMany(bookmarksToAddInStart)
+      .then(() => console.log("Initial data added."))
+      .catch(err => console.log("Problem with initial data. " + err));
   })
   .catch((err) => {
     console.log(err);

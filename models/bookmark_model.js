@@ -19,9 +19,65 @@ const bookmarksSchema = mongoose.Schema({
   },
 });
 
-const bookmarksCollection = mongoose.model('students', bookmarksSchema);
+const bookmarksCollection = mongoose.model('bookmarks', bookmarksSchema);
 
 const Bookmarks = {
+  getAll: () => {
+    return bookmarksCollection
+      .find()
+      .then(all => all)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  getBookmarksByTitle: (title) => {
+    return bookmarksCollection
+      .find({title})
+      .then(all => all)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  createBookmark: (newBookmark) => {
+    return bookmarksCollection
+      .create(newBookmark)
+      .then(createdBookmark => createdBookmark)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  deleteBookmark: (_id) => {
+    return bookmarksCollection
+      .remove({_id})
+      .then(result => result)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  updateBookmark: (_id, updatedBookmark) => {
+    return bookmarksCollection
+      .update({_id}, {$set: updatedBookmark})
+      .then(result => result)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  getBookmarkById: (_id) => {
+    return bookmarksCollection
+      .find({_id})
+      .then(result => result)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
+  insertMany: (newBookmarks) => {
+    return bookmarksCollection
+      .insertMany(newBookmarks)
+      .then(result => result)
+      .catch(err => {
+        throw new Error(err);
+      });
+  },
 };
 
 module.exports = Bookmarks;
