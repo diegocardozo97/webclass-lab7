@@ -8,6 +8,7 @@ const Bookmarks = require('./models/bookmark_model');
 const app = express();
 const jsonBodyParser = bodyParser.json();
 
+app.use(express.static("static"));
 app.use(morgan('dev'));
 
 const bookmarksToAddInStart = [
