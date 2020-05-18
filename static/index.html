@@ -5,7 +5,86 @@
     <meta name="viewport" content="width=device-width">
     <title>Bookmarks App</title>
   </head>
+
   <body>
+    <section>
+      <h1>All Bookmarks</h1>
+      <div id="all-bookmarks-error"></div>
+      <div id="all-bookmarks"></div>
+    </section>
+
+    <hr>
+
+    <section>
+      <h1>Add a Bookmark</h1>
+      <form>
+        <label for="add-title">Title:</label>
+        <input type="text" id="add-title" />
+        <label for="add-descr">Description:</label>
+        <input type="text" id="add-descr" />
+        <label for="add-url">URL:</label>
+        <input type="text" id="add-url" />
+        <label for="add-rating">Rating:</label>
+        <input type="number" id="add-rating" />
+        <button type="submit" id="add-button">
+            Add bookmark
+        </button>
+      </form>
+      <div id="add-error"></div>
+    </section>
+
+    <hr>
+
+    <section>
+      <h1>Delete a Bookmark</h1>
+      <form>
+        <label for="delete-id">ID:</label>
+        <input type="text" id="delete-id" />
+        <button type="submit" id="delete-button">
+            Delete bookmark
+        </button>
+      </form>
+      <div id="delete-error"></div>
+    </section>
+
+    <hr>
+
+    <section>
+      <h1>Update a Bookmark</h1>
+      <form>
+        <label for="update-id">ID:</label>
+        <input type="text" id="update-id" />
+        <label for="update-title">Title:</label>
+        <input type="text" id="update-title" />
+        <label for="update-descr">Description:</label>
+        <input type="text" id="update-descr" />
+        <label for="update-url">URL:</label>
+        <input type="text" id="update-url" />
+        <label for="update-rating">Rating:</label>
+        <input type="number" id="update-rating" />
+        <button type="submit" id="update-button">
+            Update bookmark
+        </button>
+      </form>
+      <div id="update-error"></div>
+    </section>
+
+    <hr>
+
+    <section>
+      <h1>Get Bookmarks by Title</h1>
+      <form>
+        <label for="by-title-title">Title:</label>
+        <input type="text" id="by-title-title" />
+        <button type="submit" id="by-title-button">
+            Get bookmarks
+        </button>
+      </form>
+      <div id="by-title-error"></div>
+      <div id="by-title-bookmarks"></div>
+    </section>
+
     <script src="./js/index.js"></script>
   </body>
+
 </html>
