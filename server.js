@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 
 const Bookmarks = require('./models/bookmark_model');
+const {DATABASE_URL, API_TOKEN, PORT} = require('./config');
 
 const app = express();
 const jsonBodyParser = bodyParser.json();
@@ -36,7 +37,7 @@ const bookmarksToAddInStart = [
 ];
 
 function validateAuthorization(req, res, next) {
-  const KEY = "2abbf7c3-245b-404f-9473-ade729ed4653";
+  const KEY = API_TOKEN;
 
   if (!("authorization" in req.headers) && !("book-api-key" in req.headers) &&
     !("apiKey" in req.query)) {
@@ -207,7 +208,7 @@ app.patch('/bookmark/:id', jsonBodyParser, (req, res) => {
     });
 });
 
-app.listen(8080, () => {
+app.listen(PORT, () => {
   console.log("This server is running on port 8080, connection to the mongodb db...");
 
   // Start the connection at mongoose [global] object to the db.
@@ -217,7 +218,7 @@ app.listen(8080, () => {
         useUnifiedTopology: true,
     };
     mongoose.connect(
-      'mongodb://localhost/bookmarksdb', 
+      DATABASE_URL, 
       settings, 
       (err) => {
         if (err) {
@@ -230,10 +231,10 @@ app.listen(8080, () => {
     );
   })
   .then(() => {
-    Bookmarks
-      .insertMany(bookmarksToAddInStart)
-      .then(() => console.log("Initial data added."))
-      .catch(err => console.log("Problem with initial data. " + err));
+    // Bookmarks
+    //   .insertMany(bookmarksToAddInStart)
+    //   .then(() => console.log("Initial data added."))
+    //   .catch(err => console.log("Problem with initial data. " + err));
   })
   .catch((err) => {
     console.log(err);
